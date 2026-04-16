@@ -39,7 +39,10 @@ namespace TP.ConcurrentProgramming.Data
                 Vector startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
                 Ball newBall = new(startingPosition, startingPosition);
                 upperLayerHandler(startingPosition, newBall);
-                BallsList.Add(newBall);
+                lock (_ballsListLock)
+                {
+                    BallsList.Add(newBall);
+                }
             }
         }
 
@@ -80,37 +83,41 @@ namespace TP.ConcurrentProgramming.Data
         private Random RandomGenerator = new();
         private List<Ball> BallsList = [];
 
+        private readonly object _ballsListLock = new object();
+
         internal void Move(object? x)
         {
             double radius = 20.0;
             double TableHeight = 400.0;
             double TableWidth = 400.0;
-
-            foreach (Ball item in BallsList)
+            lock (_ballsListLock)
             {
-                IVector pos = item.Position;
-                IVector vel = new Vector(
-                    (RandomGenerator.NextDouble() - 0.5) * 10,
-                    (RandomGenerator.NextDouble() - 0.5) * 10);
-
-                double newX = pos.x + vel.x;
-                double newY = pos.y + vel.y;
-
-                if (newX < radius || newX > TableWidth - radius)
+                foreach (Ball item in BallsList)
                 {
-                    vel = new Vector(-vel.x, vel.y);
-                    newX = Clamp(newX, radius, TableWidth - radius);
-                }
+                    IVector pos = item.Position;
+                    IVector vel = new Vector(
+                        (RandomGenerator.NextDouble() - 0.5) * 10,
+                        (RandomGenerator.NextDouble() - 0.5) * 10);
 
-                if (newY < radius || newY > TableHeight - radius)
-                {
-                    vel = new Vector(vel.x, -vel.y);
-                    newY = Clamp(newY, radius, TableHeight - radius);
-                }
+                    double newX = pos.x + vel.x;
+                    double newY = pos.y + vel.y;
 
-                item.Velocity = vel;
-                Vector delta = new Vector(newX - pos.x, newY - pos.y);
-                item.Move(delta);
+                    if (newX < radius || newX > TableWidth - radius)
+                    {
+                        vel = new Vector(-vel.x, vel.y);
+                        newX = Clamp(newX, radius, TableWidth - radius);
+                    }
+
+                    if (newY < radius || newY > TableHeight - radius)
+                    {
+                        vel = new Vector(vel.x, -vel.y);
+                        newY = Clamp(newY, radius, TableHeight - radius);
+                    }
+
+                    item.Velocity = vel;
+                    Vector delta = new Vector(newX - pos.x, newY - pos.y);
+                    item.Move(delta);
+                }
             }
         }
         private double Clamp(double value, double min, double max)
