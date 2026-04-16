@@ -66,7 +66,6 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
         private double TopBackingField;
         private double LeftBackingField;
-        private readonly double scale;
 
         private void NewPositionNotification(object sender, IPosition e)
         {
