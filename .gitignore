@@ -400,9 +400,5 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 CodeMap1.dgml
-Data
-TestResults
-.Data
-.TestResults
 LICENSE
 .LICENSE
