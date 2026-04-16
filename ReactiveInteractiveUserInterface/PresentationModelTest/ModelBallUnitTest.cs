@@ -18,7 +18,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
     [TestMethod]
     public void ConstructorTestMethod()
     {
-      ModelBall ball = new ModelBall(0.0, 0.0, 1.0, new BusinessLogicIBallFixture());
+      ModelBall ball = new ModelBall(0.0, 0.0, new BusinessLogicIBallFixture());
       Assert.AreEqual<double>(0.0, ball.Top);
       Assert.AreEqual<double>(0.0, ball.Top);
     }
@@ -27,7 +27,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
     public void PositionChangeNotificationTestMethod()
     {
       int notificationCounter = 0;
-      ModelBall ball = new ModelBall(0, 0.0, 1.0, new BusinessLogicIBallFixture());
+      ModelBall ball = new ModelBall(0, 0.0, new BusinessLogicIBallFixture());
       ball.PropertyChanged += (sender, args) => notificationCounter++;
       Assert.AreEqual(0, notificationCounter);
       ball.SetLeft(1.0);

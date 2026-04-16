@@ -24,20 +24,19 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
       Assert.AreEqual<int>(1, numberOfCallBackCalled);
     }
 
-        #region testing instrumentation
+    #region testing instrumentation
 
-        private class DataBallFixture : Data.IBall
-        {
-            public Data.IVector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-            public Data.IVector Position { get; set; } = new VectorFixture(0.0, 0.0);
-            public event EventHandler<Data.IVector>? NewPositionNotification;
+    private class DataBallFixture : Data.IBall
+    {
+      public Data.IVector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-            internal void Move()
-            {
-                NewPositionNotification?.Invoke(this, new VectorFixture(0.0, 0.0));
-            }
-        }
-    
+      public event EventHandler<Data.IVector>? NewPositionNotification;
+
+      internal void Move()
+      {
+        NewPositionNotification?.Invoke(this, new VectorFixture(0.0, 0.0));
+      }
+    }
 
     private class VectorFixture : Data.IVector
     {
@@ -51,7 +50,5 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
     }
 
     #endregion testing instrumentation
-
-
   }
 }

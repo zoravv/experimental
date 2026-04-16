@@ -1,4 +1,4 @@
-﻿ //____________________________________________________________________________________________________________________________________
+﻿//____________________________________________________________________________________________________________________________________
 //
 //  Copyright (C) 2024, Mariusz Postol LODZ POLAND.
 //
@@ -28,7 +28,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
     [TestMethod]
     public void GetDimensionsTestMethod()
     {
-      Assert.AreEqual<Dimensions>(new(20.0, 400.0, 400.0), BusinessLogicAbstractAPI.GetDimensions);
+      Assert.AreEqual<Dimensions>(new(10.0, 10.0, 10.0), BusinessLogicAbstractAPI.GetDimensions);
     }
   }
 }
