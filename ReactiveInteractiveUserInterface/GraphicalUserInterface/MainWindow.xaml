@@ -5,48 +5,55 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:TP.ConcurrentProgramming.Presentation.ViewModel;assembly=TP.ConcurrentProgramming.PresentationViewModel"
         mc:Ignorable="d"
-        Title="Presentation layer targeting reactive behaviour" Height="450" Width="800">
+        Title="Presentation layer targeting reactive behaviour"
+        Width="{Binding WindowWidth, Mode=TwoWay}" 
+        Height="{Binding WindowHeight, Mode=TwoWay}"
+        WindowStartupLocation="CenterScreen">
     <Window.DataContext>
         <vm:MainWindowViewModel />
     </Window.DataContext>
 
     <Grid>
+        <Grid.LayoutTransform>
+            <ScaleTransform ScaleX="{Binding UIScale}" ScaleY="{Binding UIScale}" />
+        </Grid.LayoutTransform>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Vertical" Margin="0,15,0,20" VerticalAlignment="Center">
-            <TextBlock Text="Liczba kul: " HorizontalAlignment="Center" Margin="0,0,5,0" FontSize="20"/>
-            <TextBlock Text="{Binding BallCount}" HorizontalAlignment="Center" Margin="0,0,0,0" FontSize="20"/>
-            <Slider Minimum="1" Maximum="10" Width="150" Value="{Binding BallCount, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" Margin="0,0,0,10"/>
+        <StackPanel Grid.Row="0" Orientation="Vertical" Margin="0,15,0,15" HorizontalAlignment="Center">
+            <TextBlock Text="Liczba kul: " HorizontalAlignment="Center" FontSize="18"/>
+            <TextBlock Text="{Binding BallCount}" HorizontalAlignment="Center" FontSize="18" FontWeight="Bold"/>
+            <Slider Minimum="1" Maximum="10" Width="200" Value="{Binding BallCount, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" Margin="0,5,0,10"/>
             <Button Content="Start"
                     Command="{Binding StartCommand}"
                     IsEnabled="{Binding CanStart}"
-                    Width="100" HorizontalAlignment="Center" />
+                    Width="120" Height="30" HorizontalAlignment="Center" />
         </StackPanel>
-        
-        <Viewbox Grid.Row="1" Stretch="Uniform" Margin="10">
-            <Border BorderThickness="4" BorderBrush="Green" Height="{Binding TableHeight}" Width="{Binding TableWidth}">
-                <ItemsControl ItemsSource="{Binding Balls}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <Canvas />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Ellipse Width="{Binding Diameter}" Height="{Binding Diameter}" Fill="Blue" />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                    <ItemsControl.ItemContainerStyle>
-                        <Style TargetType="ContentPresenter">
-                            <Setter Property="Canvas.Top" Value="{Binding Top}" />
-                            <Setter Property="Canvas.Left" Value="{Binding Left}" />
-                        </Style>
-                    </ItemsControl.ItemContainerStyle>
-                </ItemsControl>
-            </Border>
-        </Viewbox>
+
+        <Border Grid.Row="1" BorderThickness="4" BorderBrush="Green" 
+                Height="{Binding TableHeight}" Width="{Binding TableWidth}" 
+                HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,20">
+            <ItemsControl ItemsSource="{Binding Balls}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Ellipse Width="{Binding Diameter}" Height="{Binding Diameter}" Fill="Blue" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
+                        <Setter Property="Canvas.Top" Value="{Binding Top}" />
+                        <Setter Property="Canvas.Left" Value="{Binding Left}" />
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
+            </ItemsControl>
+        </Border>
     </Grid>
 </Window>

@@ -32,8 +32,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
         public double TableWidth_scaled => GetDimensions.TableWidth * Scale;
         public double TableHeight_scaled => GetDimensions.TableHeight * Scale;
         public double BallDiameter_scaled => GetDimensions.BallDimension * Scale;
-
-        public static readonly double Scale = 1.0;
+        public static double Scale { get; set; } = 1.0;
 
         #region IObservable
 
