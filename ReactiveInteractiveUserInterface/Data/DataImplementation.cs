@@ -19,7 +19,7 @@ namespace TP.ConcurrentProgramming.Data
 
         public DataImplementation()
         {
-            MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(15));
+            MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(16));
         }
 
         #endregion ctor
@@ -82,10 +82,9 @@ namespace TP.ConcurrentProgramming.Data
         private readonly Timer MoveTimer;
         private Random RandomGenerator = new();
         private List<Ball> BallsList = [];
-
         private readonly object _ballsListLock = new object();
 
-        internal void Move(object? x)
+        private void Move(object? x)
         {
             double radius = 20.0;
             double TableHeight = 400.0;

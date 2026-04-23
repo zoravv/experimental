@@ -23,11 +23,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         #region Layer API
 
-        public static readonly Dimensions GetDimensions = new(
-            BallDimension: 20.0,
-            TableHeight: 400.0,
-            TableWidth: 400.0
-        );
+        public static readonly Dimensions GetDimensions = new(20.0, 400.0, 400.0);
 
         public abstract void Start(int numberOfBalls, Action<IPosition, IBall> upperLayerHandler);
 
