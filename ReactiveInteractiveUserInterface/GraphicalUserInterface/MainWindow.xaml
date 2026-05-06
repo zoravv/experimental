@@ -34,12 +34,11 @@
         </StackPanel>
 
         <Border Grid.Row="1" BorderThickness="4" BorderBrush="Green" 
-                Height="{Binding TableHeight}" Width="{Binding TableWidth}" 
                 HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,20">
-            <ItemsControl ItemsSource="{Binding Balls}">
+            <ItemsControl ItemsSource="{Binding Balls}" Height="{Binding TableHeight}" Width="{Binding TableWidth}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <Canvas />
+                        <Canvas ClipToBounds="True" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>

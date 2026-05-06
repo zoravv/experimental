@@ -74,21 +74,22 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             double newVy = currentVy;
             double positionX = pos1.x;
             double positionY = pos1.y;
+            double radius = GetBallRadius();
 
-            if (positionX <= 0 && currentVx < 0)
+            if (positionX <= radius && currentVx < 0)
             {
                 newVx = -currentVx;
             }
-            else if (positionX >= tableWidth && currentVx > 0)
+            else if (positionX >= tableWidth - radius && currentVx > 0)
             {
                 newVx = -currentVx;
             }
 
-            if (positionY <= 0 && currentVy < 0)
+            if (positionY <= radius && currentVy < 0)
             {
                 newVy = -currentVy;
             }
-            else if (positionY >= tableHeight && currentVy > 0)
+            else if (positionY >= tableHeight - radius && currentVy > 0)
             {
                 newVy = -currentVy;
             }

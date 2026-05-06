@@ -55,7 +55,7 @@ namespace TP.ConcurrentProgramming.Data
                 }
                 existingPositions.Add(startingPosition);
 
-                Vector startingVelocity = new(random.Next(-100 - -20, 100 - 20), random.Next(-100 - -20, 100 - 20));
+                Vector startingVelocity = new(random.Next(-150, 150), random.Next(-150, 150));
                 double weight = 1.0;
                 Ball newBall = new(startingPosition, startingVelocity, weight);
                 upperLayerHandler(startingPosition, newBall);
