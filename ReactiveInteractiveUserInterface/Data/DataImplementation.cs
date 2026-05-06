@@ -17,10 +17,7 @@ namespace TP.ConcurrentProgramming.Data
     {
         #region ctor
 
-        public DataImplementation()
-        {
-            MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(16));
-        }
+        public DataImplementation() { }
 
         #endregion ctor
 
@@ -34,17 +31,48 @@ namespace TP.ConcurrentProgramming.Data
                 throw new ArgumentNullException(nameof(upperLayerHandler));
 
             Random random = new Random();
+            const double minDistance = 25;
+            List<IVector> existingPositions = new List<IVector>();
+
             for (int i = 0; i < numberOfBalls; i++)
             {
-                Vector startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
-                Ball newBall = new(startingPosition, startingPosition);
-                upperLayerHandler(startingPosition, newBall);
-                lock (_ballsListLock)
+                Vector startingPosition = null;
+                bool validPosition = false;
+                int maxAttempts = 1000;
+                for (int attempt = 0; attempt < maxAttempts && !validPosition; attempt++)
                 {
-                    BallsList.Add(newBall);
+                    startingPosition = new Vector(random.Next(100, 300), random.Next(100, 380));
+                    validPosition = true;
+                    foreach (var pos in existingPositions)
+                    {
+                        double distance = Math.Sqrt(Math.Pow(startingPosition.x - pos.x, 2) + Math.Pow(startingPosition.y - pos.y, 2));
+                        if (distance < minDistance)
+                        {
+                            validPosition = false;
+                            break;
+                        }
+                    }
+                }
+                existingPositions.Add(startingPosition);
+
+                Vector startingVelocity = new(random.Next(-100 - -20, 100 - 20), random.Next(-100 - -20, 100 - 20));
+                double weight = 1.0;
+                Ball newBall = new(startingPosition, startingVelocity, weight);
+                upperLayerHandler(startingPosition, newBall);
+                Task movementTask = newBall.StartMovementTask();
+                lock (_balllock)
+                {
+                    _ballTasks.Add(movementTask);
+                    _ballsList.Add(newBall);
                 }
             }
         }
+
+        public override IVector CreateVector(double x, double y)
+        {
+            return new Vector(x, y);
+        }
+
 
         #endregion DataAbstractAPI
 
@@ -56,13 +84,34 @@ namespace TP.ConcurrentProgramming.Data
             {
                 if (disposing)
                 {
-                    MoveTimer.Dispose();
-                    BallsList.Clear();
+                    lock (_balllock)
+                    {
+                        foreach (var ball in _ballsList)
+                        {
+                            ball.StopMovement();
+                        }
+                    }
+                    try
+                    {
+                        Task.WhenAll(_ballTasks).Wait();
+                    }
+                    catch (AggregateException ae)
+                    {
+                        foreach (var inner in ae.InnerExceptions)
+                        {
+                            if (inner is not TaskCanceledException)
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    _ballTasks.Clear();
+                    _ballsList.Clear();
                 }
+
                 Disposed = true;
             }
-            else
-                throw new ObjectDisposedException(nameof(DataImplementation));
         }
 
         public override void Dispose()
@@ -76,57 +125,12 @@ namespace TP.ConcurrentProgramming.Data
 
         #region private
 
+        private readonly List<Task> _ballTasks = new List<Task>();
+        private readonly List<Ball> _ballsList = new List<Ball>();
+        private readonly object _balllock = new();
+
         //private bool disposedValue;
         private bool Disposed = false;
-
-        private readonly Timer MoveTimer;
-        private Random RandomGenerator = new();
-        private List<Ball> BallsList = [];
-        private readonly object _ballsListLock = new object();
-
-        private void Move(object? x)
-        {
-            double radius = 20.0;
-            double TableHeight = 400.0;
-            double TableWidth = 400.0;
-            lock (_ballsListLock)
-            {
-                foreach (Ball item in BallsList)
-                {
-                    IVector pos = item.Position;
-                    IVector vel = new Vector(
-                        (RandomGenerator.NextDouble() - 0.5) * 10,
-                        (RandomGenerator.NextDouble() - 0.5) * 10);
-
-                    double newX = pos.x + vel.x;
-                    double newY = pos.y + vel.y;
-
-                    if (newX < radius || newX > TableWidth - radius)
-                    {
-                        vel = new Vector(-vel.x, vel.y);
-                        newX = Clamp(newX, radius, TableWidth - radius);
-                    }
-
-                    if (newY < radius || newY > TableHeight - radius)
-                    {
-                        vel = new Vector(vel.x, -vel.y);
-                        newY = Clamp(newY, radius, TableHeight - radius);
-                    }
-
-                    item.Velocity = vel;
-                    Vector delta = new Vector(newX - pos.x, newY - pos.y);
-                    item.Move(delta);
-                }
-            }
-        }
-        private double Clamp(double value, double min, double max)
-        {
-            if (value < min)
-                return min;
-            if (value > max)
-                return max;
-            return value;
-        }
 
         #endregion private
 
@@ -135,13 +139,13 @@ namespace TP.ConcurrentProgramming.Data
         [Conditional("DEBUG")]
         internal void CheckBallsList(Action<IEnumerable<IBall>> returnBallsList)
         {
-            returnBallsList(BallsList);
+            returnBallsList(_ballsList);
         }
 
         [Conditional("DEBUG")]
         internal void CheckNumberOfBalls(Action<int> returnNumberOfBalls)
         {
-            returnNumberOfBalls(BallsList.Count);
+            returnNumberOfBalls(_ballsList.Count);
         }
 
         [Conditional("DEBUG")]

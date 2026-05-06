@@ -8,26 +8,106 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
+using System;
+using TP.ConcurrentProgramming.Data;
+
 namespace TP.ConcurrentProgramming.BusinessLogic
 {
     internal class Ball : IBall
     {
-        public Ball(Data.IBall ball)
+        private readonly Data.IBall _underlyingBall;
+        private readonly Data.DataAbstractAPI _dataLayer;
+        private IPosition _currentPosition;
+        private readonly double tableWidth = 400;
+        private readonly double tableHeight = 400;
+
+        internal Ball(Data.IBall ball, Data.DataAbstractAPI dataLayer, IPosition initialPosition)
         {
-            ball.NewPositionNotification += RaisePositionChangeEvent;
+            _underlyingBall = ball;
+            _dataLayer = dataLayer;
+            _currentPosition = initialPosition;
+            _underlyingBall.NewPositionNotification += RaisePositionChangeEvent;
         }
 
         #region IBall
 
         public event EventHandler<IPosition>? NewPositionNotification;
 
+        public IPosition GetPosition()
+        {
+            return _currentPosition;
+        }
+
+        public Data.IVector GetVelocity()
+        {
+            return _underlyingBall.Velocity;
+        }
+
+        public double GetWeight()
+        {
+            return _underlyingBall.Weight;
+        }
+
+        public double GetBallRadius()
+        {
+            return _underlyingBall.BallRadius;
+        }
+
+        public void SetVelocity(Data.IVector velocity)
+        {
+            _underlyingBall.Velocity = velocity;
+        }
+
         #endregion IBall
 
         #region private
 
-        private void RaisePositionChangeEvent(object? sender, Data.IVector e)
+        private void RaisePositionChangeEvent(object? sender, Data.IVector dataPosition)
         {
-            NewPositionNotification?.Invoke(this, new Position(e.x, e.y));
+            _currentPosition = new Position(dataPosition.x, dataPosition.y);
+
+            IPosition pos1 = _currentPosition;
+            Data.IVector v1 = GetVelocity();
+            double currentVx = v1.x;
+            double currentVy = v1.y;
+            double newVx = currentVx;
+            double newVy = currentVy;
+            double positionX = pos1.x;
+            double positionY = pos1.y;
+
+            if (positionX <= 0 && currentVx < 0)
+            {
+                newVx = -currentVx;
+            }
+            else if (positionX >= tableWidth && currentVx > 0)
+            {
+                newVx = -currentVx;
+            }
+
+            if (positionY <= 0 && currentVy < 0)
+            {
+                newVy = -currentVy;
+            }
+            else if (positionY >= tableHeight && currentVy > 0)
+            {
+                newVy = -currentVy;
+            }
+
+            if (newVx != currentVx || newVy != currentVy)
+            {
+                SetVelocity(_dataLayer.CreateVector(newVx, newVy));
+                v1 = GetVelocity();
+                currentVx = v1.x;
+                currentVy = v1.y;
+            }
+            NewPositionNotification?.Invoke(this, _currentPosition);
+        }
+        internal void DetachFromDataBall()
+        {
+            if (_underlyingBall != null)
+            {
+                _underlyingBall.NewPositionNotification -= RaisePositionChangeEvent;
+            }
         }
 
         #endregion private

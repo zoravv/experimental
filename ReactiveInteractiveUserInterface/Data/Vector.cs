@@ -37,5 +37,10 @@ namespace TP.ConcurrentProgramming.Data
             x = XComponent;
             y = YComponent;
         }
+
+        public static Vector operator *(Vector v, double scalar)
+        {
+            return new Vector(v.x * scalar, v.y * scalar);
+        }
     }
 }

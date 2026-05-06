@@ -25,6 +25,8 @@ namespace TP.ConcurrentProgramming.Data
 
         public abstract void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler);
 
+        public abstract IVector CreateVector(double x, double y);
+
         #endregion public API
 
         #region IDisposable
@@ -56,5 +58,8 @@ namespace TP.ConcurrentProgramming.Data
     public interface IBall
     {
         event EventHandler<IVector> NewPositionNotification;
+        double Weight { get; }
+        double BallRadius { get; }
+        IVector Velocity { get; set; }
     }
 }
