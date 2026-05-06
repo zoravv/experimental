@@ -82,7 +82,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             var pos1 = movedBall.GetPosition();
             var v1 = movedBall.GetVelocity();
             var m1 = movedBall.GetWeight();
-
+            var r1 = movedBall.GetBallRadius();
 
             List<Ball> ballsCopy;
             lock (_lock)
@@ -98,9 +98,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 var pos2 = other.GetPosition();
                 var v2 = other.GetVelocity();
                 var m2 = other.GetWeight();
-                var r1 = other.GetBallRadius();
+                var r2 = other.GetBallRadius();
 
-                if (AreBallsColliding(pos1, pos2, r1))
+                if (AreBallsColliding(pos1, pos2, r1, r2))
                 {
                     double dx = pos1.x - pos2.x;
                     double dy = pos1.y - pos2.y;
@@ -139,12 +139,14 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 }
             }
         }
-        private bool AreBallsColliding(IPosition pos1, IPosition pos2, double BallRadius)
+
+        private bool AreBallsColliding(IPosition pos1, IPosition pos2, double radius1, double radius2)
         {
             double dx = pos1.x - pos2.x;
             double dy = pos1.y - pos2.y;
+            double minDistance = radius1 + radius2;
             double distanceSquared = dx * dx + dy * dy;
-            return distanceSquared < (BallRadius * 2) * (BallRadius * 2);
+            return distanceSquared < (minDistance * minDistance);
         }
 
         private bool Disposed = false;

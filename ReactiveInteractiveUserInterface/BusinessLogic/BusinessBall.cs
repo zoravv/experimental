@@ -18,6 +18,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         private readonly Data.IBall _underlyingBall;
         private readonly Data.DataAbstractAPI _dataLayer;
         private IPosition _currentPosition;
+        private readonly object _positionLock = new object();
         private readonly double tableWidth = 400;
         private readonly double tableHeight = 400;
 
@@ -35,7 +36,10 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         public IPosition GetPosition()
         {
-            return _currentPosition;
+            lock (_positionLock)
+            {
+                return _currentPosition;
+            }
         }
 
         public Data.IVector GetVelocity()
@@ -64,9 +68,12 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         private void RaisePositionChangeEvent(object? sender, Data.IVector dataPosition)
         {
-            _currentPosition = new Position(dataPosition.x, dataPosition.y);
+            lock (_positionLock)
+            {
+                _currentPosition = new Position(dataPosition.x, dataPosition.y);
+            }
 
-            IPosition pos1 = _currentPosition;
+            IPosition pos1 = GetPosition();
             Data.IVector v1 = GetVelocity();
             double currentVx = v1.x;
             double currentVy = v1.y;
@@ -101,8 +108,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 currentVx = v1.x;
                 currentVy = v1.y;
             }
-            NewPositionNotification?.Invoke(this, _currentPosition);
+            NewPositionNotification?.Invoke(this, GetPosition());
         }
+
         internal void DetachFromDataBall()
         {
             if (_underlyingBall != null)

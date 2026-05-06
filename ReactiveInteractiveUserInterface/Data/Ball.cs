@@ -52,6 +52,8 @@ namespace TP.ConcurrentProgramming.Data
 
         private readonly object _velocityLock = new object();
 
+        private readonly object _positionLock = new object();
+
         private readonly CancellationTokenSource _cancellationTokenSource;
 
         private Task? _movementTask;
@@ -65,7 +67,10 @@ namespace TP.ConcurrentProgramming.Data
 
         private void Move(Vector delta)
         {
-            _position = new Vector(_position.x + delta.x, _position.y + delta.y);
+            lock (_positionLock)
+            {
+                _position = new Vector(_position.x + delta.x, _position.y + delta.y);
+            }
             RaiseNewPositionChangeNotification();
         }
 
