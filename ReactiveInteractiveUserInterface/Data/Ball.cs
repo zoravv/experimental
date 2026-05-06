@@ -9,6 +9,7 @@
 //_____________________________________________________________________________________________________________________________________
 
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,6 +26,7 @@ namespace TP.ConcurrentProgramming.Data
             BallRadius = 10;
             Weight = weight;
             _cancellationTokenSource = new CancellationTokenSource();
+            _movementTask = Task.Run(() => RunMovementLoop(_cancellationTokenSource.Token));
         }
 
         #endregion ctor
@@ -60,6 +62,23 @@ namespace TP.ConcurrentProgramming.Data
 
         private Vector _position;
 
+        private int CalculateMovementIntervalMs(IVector velocity)
+        {
+            double velocityMagnitude = Math.Sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
+
+            const int minIntervalMs = 8;
+            const int maxIntervalMs = 16;
+            const double velocityThreshold = 200.0;
+
+            if (velocityMagnitude <= 0)
+                return maxIntervalMs;
+
+            double normalizedVelocity = Math.Min(velocityMagnitude / velocityThreshold, 1.0);
+            int calculatedInterval = (int)(maxIntervalMs - (normalizedVelocity * (maxIntervalMs - minIntervalMs)));
+
+            return Math.Max(minIntervalMs, Math.Min(maxIntervalMs, calculatedInterval));
+        }
+
         private void RaiseNewPositionChangeNotification()
         {
             NewPositionNotification?.Invoke(this, Position);
@@ -76,22 +95,24 @@ namespace TP.ConcurrentProgramming.Data
 
         private async Task RunMovementLoop(CancellationToken token)
         {
-            const int movementIntervalMs = 16;
-
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             while (!token.IsCancellationRequested)
             {
                 try
                 {
-                    await Task.Delay(movementIntervalMs, token);
-
                     IVector currentVelocity;
                     lock (_velocityLock)
                     {
                         currentVelocity = Velocity;
                     }
+                    int movementIntervalMs = CalculateMovementIntervalMs(currentVelocity);
 
+                    await Task.Delay(movementIntervalMs, token);
+                    double elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
+                    stopwatch.Restart();
                     Vector velocityVector = (Vector)currentVelocity;
-                    Vector delta = velocityVector * (movementIntervalMs / 1000.0);
+                    Vector delta = velocityVector * (elapsedMs / 1000.0);
 
                     Move(delta);
                 }
@@ -106,10 +127,9 @@ namespace TP.ConcurrentProgramming.Data
             }
         }
 
-        internal Task StartMovementTask()
+        internal Task GetMovementTask()
         {
-            _movementTask = Task.Run(() => RunMovementLoop(_cancellationTokenSource.Token));
-            return _movementTask;
+            return _movementTask ?? Task.CompletedTask;
         }
 
         #endregion private

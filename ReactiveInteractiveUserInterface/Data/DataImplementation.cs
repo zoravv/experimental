@@ -59,10 +59,9 @@ namespace TP.ConcurrentProgramming.Data
                 double weight = 1.0;
                 Ball newBall = new(startingPosition, startingVelocity, weight);
                 upperLayerHandler(startingPosition, newBall);
-                Task movementTask = newBall.StartMovementTask();
                 lock (_balllock)
                 {
-                    _ballTasks.Add(movementTask);
+                    _ballTasks.Add(newBall.GetMovementTask());
                     _ballsList.Add(newBall);
                 }
             }
