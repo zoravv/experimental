@@ -79,38 +79,38 @@ namespace TP.ConcurrentProgramming.Data
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!Disposed)
-            {
-                if (disposing)
-                {
-                    lock (_balllock)
-                    {
-                        foreach (var ball in _ballsList)
-                        {
-                            ball.StopMovement();
-                        }
-                    }
-                    try
-                    {
-                        Task.WhenAll(_ballTasks).Wait();
-                    }
-                    catch (AggregateException ae)
-                    {
-                        foreach (var inner in ae.InnerExceptions)
-                        {
-                            if (inner is not TaskCanceledException)
-                            {
-                                break;
-                            }
-                        }
-                    }
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(DataImplementation));
 
-                    _ballTasks.Clear();
-                    _ballsList.Clear();
+            if (disposing)
+            {
+                lock (_balllock)
+                {
+                    foreach (var ball in _ballsList)
+                    {
+                        ball.StopMovement();
+                    }
+                }
+                try
+                {
+                    Task.WhenAll(_ballTasks).Wait();
+                }
+                catch (AggregateException ae)
+                {
+                    foreach (var inner in ae.InnerExceptions)
+                    {
+                        if (inner is not TaskCanceledException)
+                        {
+                            break;
+                        }
+                    }
                 }
 
-                Disposed = true;
+                _ballTasks.Clear();
+                _ballsList.Clear();
             }
+
+            Disposed = true;
         }
 
         public override void Dispose()

@@ -12,6 +12,7 @@ using System;
 using System.ComponentModel;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading;
 using TP.ConcurrentProgramming.Presentation.Model;
 using ModelIBall = TP.ConcurrentProgramming.Presentation.Model.IBall;
 
@@ -20,6 +21,16 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
     [TestClass]
     public class MainWindowViewModelUnitTest
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            // Ensure a SynchronizationContext is available for tests
+            if (SynchronizationContext.Current == null)
+            {
+                SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
+            }
+        }
+
         [TestMethod]
         public void ConstructorTest()
         {
@@ -38,6 +49,25 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
                 Assert.AreEqual<int>(1, nullModelFixture.Subscribed);
             }
             Assert.AreEqual<int>(1, nullModelFixture.Disposed);
+        }
+
+        [TestMethod]
+        public void ConstructorTestTestMethod()
+        {
+            ModelNullFixture nullModelFixture = new();
+            MainWindowViewModel viewModel = new(nullModelFixture);
+            viewModel.Dispose();
+            Assert.ThrowsException<ObjectDisposedException>(() => viewModel.Dispose());
+        }
+
+        [TestMethod]
+        public void DisposeTestMethod()
+        {
+            ModelNullFixture nullModelFixture = new();
+            MainWindowViewModel viewModel = new(nullModelFixture);
+            viewModel.Dispose();
+            Assert.ThrowsException<ObjectDisposedException>(() => viewModel.Dispose());
+            Assert.ThrowsException<ObjectDisposedException>(() => viewModel.Start(5));
         }
 
         [TestMethod]
@@ -120,16 +150,18 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
 
             #region ModelAbstractApi fixture
 
-            public override IDisposable? Subscribe(IObserver<ModelIBall> observer)
+            public override IDisposable Subscribe(IObserver<ModelIBall> observer)
             {
-                return eventObservable?.Subscribe(x => observer.OnNext(x.EventArgs.Ball), ex => observer.OnError(ex), () => observer.OnCompleted());
+                if (eventObservable == null)
+                    return new NullDisposable();
+                return eventObservable.Subscribe(x => observer.OnNext(x.EventArgs.Ball), ex => observer.OnError(ex), () => observer.OnCompleted());
             }
 
             public override void Start(int numberOfBalls)
             {
                 for (int i = 0; i < numberOfBalls; i++)
                 {
-                    ModelBall newBall = new ModelBall(0, 0) { };
+                    ModelBall newBall = new ModelBall(0, 0);
                     BallChanged?.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
                 }
             }
@@ -151,24 +183,27 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
 
             #region private
 
-            private IObservable<EventPattern<BallChaneEventArgs>>? eventObservable = null;
+            private IObservable<EventPattern<BallChaneEventArgs>> eventObservable;
 
             private class ModelBall : ModelIBall
             {
                 public ModelBall(double top, double left)
-                { }
+                {
+                }
 
                 #region IBall
 
-                public double Diameter => throw new NotImplementedException();
+                public double Diameter => 10.0;
 
-                public double Top => throw new NotImplementedException();
+                public double Top => 0.0;
 
-                public double Left => throw new NotImplementedException();
+                public double Left => 0.0;
+
+                #endregion IBall
 
                 #region INotifyPropertyChanged
 
-                public event PropertyChangedEventHandler? PropertyChanged;
+                public event PropertyChangedEventHandler PropertyChanged;
 
                 #endregion INotifyPropertyChanged
 
@@ -177,9 +212,17 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
 
             #endregion private
 
+            #region private helper
 
+            private class NullDisposable : IDisposable
+            {
+                public void Dispose()
+                { }
+            }
 
+            #endregion private helper
         }
-            #endregion testing infrastructure   
+            
     }
+
 }

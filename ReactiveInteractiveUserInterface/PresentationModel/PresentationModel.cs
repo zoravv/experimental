@@ -72,7 +72,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
             {
                 Diameter = UnderneathLayerAPI.GetDimensions.BallDimension * Scale
             };
-            BallChanged.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
+            BallChanged?.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
         }
 
         #endregion private
