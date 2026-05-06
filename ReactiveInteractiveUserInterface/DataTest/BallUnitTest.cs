@@ -1,4 +1,4 @@
-﻿//____________________________________________________________________________________________________________________________________
+//____________________________________________________________________________________________________________________________________
 //
 //  Copyright (C) 2024, Mariusz Postol LODZ POLAND.
 //
@@ -17,18 +17,21 @@ namespace TP.ConcurrentProgramming.Data.Test
     public void ConstructorTestMethod()
     {
       Vector testinVector = new Vector(0.0, 0.0);
-      Ball newInstance = new(testinVector, testinVector);
+      Ball newInstance = new(testinVector, testinVector, 1.0);
     }
 
     [TestMethod]
     public void MoveTestMethod()
     {
       Vector initialPosition = new(10.0, 10.0);
-      Ball newInstance = new(initialPosition, new Vector(0.0, 0.0));
+      Ball newInstance = new(initialPosition, new Vector(0.0, 0.0), 1.0);
+      // Stop the background movement loop before testing Move manually
+      newInstance.StopMovement();
+      newInstance.GetMovementTask().Wait(500);
       IVector curentPosition = new Vector(0.0, 0.0);
       int numberOfCallBackCalled = 0;
       newInstance.NewPositionNotification += (sender, position) => { Assert.IsNotNull(sender); curentPosition = position; numberOfCallBackCalled++; };
-      newInstance.Move(new Vector(0.0, 0.0));
+      newInstance.MoveForTest(new Vector(0.0, 0.0));
       Assert.AreEqual<int>(1, numberOfCallBackCalled);
       Assert.AreEqual<IVector>(initialPosition, curentPosition);
     }

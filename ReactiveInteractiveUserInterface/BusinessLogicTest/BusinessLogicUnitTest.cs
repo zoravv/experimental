@@ -1,4 +1,4 @@
-﻿//____________________________________________________________________________________________________________________________________
+//____________________________________________________________________________________________________________________________________
 //
 //  Copyright (C) 2024, Mariusz Postol LODZ POLAND.
 //
@@ -72,7 +72,11 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
         throw new NotImplementedException();
       }
 
-        }
+      public override IVector CreateVector(double x, double y)
+      {
+        return new DataVectorFixture() { x = x, y = y };
+      }
+    }
 
     private class DataLayerDisposeFixcure : Data.DataAbstractAPI
     {
@@ -88,7 +92,11 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
         throw new NotImplementedException();
       }
 
-        }
+      public override IVector CreateVector(double x, double y)
+      {
+        return new DataVectorFixture() { x = x, y = y };
+      }
+    }
 
     private class DataLayerStartFixcure : Data.DataAbstractAPI
     {
@@ -105,24 +113,38 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
         upperLayerHandler(new DataVectorFixture(), new DataBallFixture());
       }
 
-      private record DataVectorFixture : Data.IVector
+      public override IVector CreateVector(double x, double y)
       {
-        public double x { get; init; }
-        public double y { get; init; }
+        return new DataVectorFixture() { x = x, y = y };
       }
 
       private class DataBallFixture : Data.IBall
       {
-        public IVector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public IVector Position { get; set; } = new DataVectorFixture();
+        private IVector _velocity = new DataVectorFixture();
+
+        public IVector Velocity
+        {
+          get => _velocity;
+          set => _velocity = value;
+        }
+
+        public double Weight { get; } = 1.0;
+
+        public double BallRadius { get; } = 10.0;
+
         public event EventHandler<IVector>? NewPositionNotification
         {
           add { }
           remove { }
         }
       }
+    }
 
-        }
+    private record DataVectorFixture : Data.IVector
+    {
+      public double x { get; init; }
+      public double y { get; init; }
+    }
 
     #endregion testing instrumentation
   }
