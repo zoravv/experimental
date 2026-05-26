@@ -19,14 +19,16 @@ namespace TP.ConcurrentProgramming.Data
     {
         #region ctor
 
-        internal Ball(Vector initialPosition, Vector initialVelocity, double weight)
+        internal Ball(Vector initialPosition, Vector initialVelocity, double weight, Logger logger)
         {
+            Id = Interlocked.Increment(ref _nextBallId);
             _position = initialPosition;
             Velocity = initialVelocity;
             BallRadius = 10;
             Weight = weight;
             _cancellationTokenSource = new CancellationTokenSource();
             _movementTask = Task.Run(() => RunMovementLoop(_cancellationTokenSource.Token));
+            _logger = logger;
         }
 
         #endregion ctor
@@ -43,6 +45,8 @@ namespace TP.ConcurrentProgramming.Data
 
         public double BallRadius { get; }
 
+        public int Id { get; }
+
         public void StopMovement()
         {
             _cancellationTokenSource.Cancel();
@@ -51,6 +55,8 @@ namespace TP.ConcurrentProgramming.Data
         #endregion IBall
 
         #region private
+
+        private static int _nextBallId = 0;
 
         private readonly object _velocityLock = new object();
 
@@ -61,6 +67,8 @@ namespace TP.ConcurrentProgramming.Data
         private Task? _movementTask;
 
         private Vector _position;
+
+        private readonly Logger _logger;
 
         private int CalculateMovementIntervalMs(IVector velocity)
         {
@@ -82,6 +90,17 @@ namespace TP.ConcurrentProgramming.Data
         private void RaiseNewPositionChangeNotification()
         {
             NewPositionNotification?.Invoke(this, Position);
+            _logger.Log(new DiagnosticData
+            {
+                Timestamp = DateTime.Now,
+                BallId = Id,
+                PositionX = Position.x,
+                PositionY = Position.y,
+                VelocityX = Velocity.x,
+                VelocityY = Velocity.y,
+                EventType = DiagnosticEventType.PositionUpdate,
+                Message = $"Ball position update"
+            });
         }
 
         private void Move(Vector delta)

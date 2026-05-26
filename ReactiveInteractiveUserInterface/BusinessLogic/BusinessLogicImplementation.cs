@@ -83,6 +83,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             var v1 = movedBall.GetVelocity();
             var m1 = movedBall.GetWeight();
             var r1 = movedBall.GetBallRadius();
+            int id1 = movedBall.getId();
 
             List<Ball> ballsCopy;
             lock (_lock)
@@ -98,6 +99,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 var pos2 = other.GetPosition();
                 var v2 = other.GetVelocity();
                 var m2 = other.GetWeight();
+                int id2 = other.getId();
                 var r2 = other.GetBallRadius();
 
                 if (AreBallsColliding(pos1, pos2, r1, r2))
@@ -111,6 +113,17 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
                     if (dotProduct < 0)
                     {
+                        layerBellow.LogDiagnosticData(new DiagnosticData
+                        {
+                            Timestamp = DateTime.Now,
+                            PositionX = pos1.x,
+                            PositionY = pos1.y,
+                            VelocityX = v1.x,
+                            VelocityY = v1.y,
+                            EventType = DiagnosticEventType.CollisionDetected,
+                            Message = $"Collision detected between balls: {id1} and {id2}."
+                        });
+
                         double totalMass = m1 + m2;
                         if (totalMass > 0)
                         {
@@ -134,6 +147,19 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
                             movedBall.SetVelocity(layerBellow.CreateVector(finalV1x, finalV1y));
                             other.SetVelocity(layerBellow.CreateVector(finalV2x, finalV2y));
+                        }
+                        else
+                        {
+                            layerBellow.LogDiagnosticData(new DiagnosticData
+                            {
+                                Timestamp = DateTime.Now,
+                                PositionX = pos1.x,
+                                PositionY = pos1.y,
+                                VelocityX = v1.x,
+                                VelocityY = v1.y,
+                                EventType = DiagnosticEventType.CollisionNoBounce,
+                                Message = $"Balls {id1} and {id2} overlapping but moving apart."
+                            });
                         }
                     }
                 }

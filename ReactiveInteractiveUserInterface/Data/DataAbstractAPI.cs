@@ -27,6 +27,8 @@ namespace TP.ConcurrentProgramming.Data
 
         public abstract IVector CreateVector(double x, double y);
 
+        public abstract void LogDiagnosticData(DiagnosticData data);
+
         #endregion public API
 
         #region IDisposable
@@ -58,6 +60,7 @@ namespace TP.ConcurrentProgramming.Data
     public interface IBall
     {
         event EventHandler<IVector> NewPositionNotification;
+        int Id { get; }
         double Weight { get; }
         double BallRadius { get; }
         IVector Velocity { get; set; }

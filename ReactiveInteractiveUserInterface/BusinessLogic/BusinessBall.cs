@@ -9,6 +9,7 @@
 //_____________________________________________________________________________________________________________________________________
 
 using System;
+using System.ComponentModel.DataAnnotations;
 using TP.ConcurrentProgramming.Data;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
@@ -52,6 +53,11 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             return _underlyingBall.Weight;
         }
 
+        public int getId()
+        {
+            return _underlyingBall.Id;
+        }
+
         public double GetBallRadius()
         {
             return _underlyingBall.BallRadius;
@@ -75,6 +81,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
             IPosition pos1 = GetPosition();
             Data.IVector v1 = GetVelocity();
+            int id = getId();
             double currentVx = v1.x;
             double currentVy = v1.y;
             double newVx = currentVx;
@@ -107,6 +114,17 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 v1 = GetVelocity();
                 currentVx = v1.x;
                 currentVy = v1.y;
+                _dataLayer.LogDiagnosticData(new DiagnosticData
+                {
+                    Timestamp = DateTime.Now,
+                    BallId = id,
+                    PositionX = pos1.x,
+                    PositionY = pos1.y,
+                    VelocityX = newVx,
+                    VelocityY = newVy,
+                    EventType = DiagnosticEventType.WallBounce,
+                    Message = $"Wall bounce detected."
+                });
             }
             NewPositionNotification?.Invoke(this, GetPosition());
         }

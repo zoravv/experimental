@@ -17,7 +17,12 @@ namespace TP.ConcurrentProgramming.Data
     {
         #region ctor
 
-        public DataImplementation() { }
+        public DataImplementation() 
+        {
+            string logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs");
+            string logFilePath = Path.Combine(logDirectory, "diagnostic.log");
+            _logger = new Logger(logFilePath);
+        }
 
         #endregion ctor
 
@@ -57,7 +62,7 @@ namespace TP.ConcurrentProgramming.Data
 
                 Vector startingVelocity = new(random.Next(-150, 150), random.Next(-150, 150));
                 double weight = 1.0;
-                Ball newBall = new(startingPosition, startingVelocity, weight);
+                Ball newBall = new(startingPosition, startingVelocity, weight, _logger);
                 upperLayerHandler(startingPosition, newBall);
                 lock (_balllock)
                 {
@@ -72,6 +77,10 @@ namespace TP.ConcurrentProgramming.Data
             return new Vector(x, y);
         }
 
+        public override void LogDiagnosticData(DiagnosticData data)
+        {
+            _logger.Log(data);
+        }
 
         #endregion DataAbstractAPI
 
@@ -108,6 +117,7 @@ namespace TP.ConcurrentProgramming.Data
 
                 _ballTasks.Clear();
                 _ballsList.Clear();
+                _logger.Dispose();
             }
 
             Disposed = true;
@@ -127,6 +137,7 @@ namespace TP.ConcurrentProgramming.Data
         private readonly List<Task> _ballTasks = new List<Task>();
         private readonly List<Ball> _ballsList = new List<Ball>();
         private readonly object _balllock = new();
+        private readonly Logger _logger;
 
         //private bool disposedValue;
         private bool Disposed = false;
