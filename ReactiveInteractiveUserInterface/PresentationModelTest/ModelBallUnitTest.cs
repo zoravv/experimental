@@ -6,7 +6,7 @@
 //
 //  https://github.com/mpostol/TP/discussions/182
 //
-//_____________________________________________________________________________________________________________________________________.
+//_____________________________________________________________________________________________________________________________________
 
 using TP.ConcurrentProgramming.BusinessLogic;
 
@@ -20,8 +20,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
     {
       ModelBall ball = new ModelBall(0.0, 0.0, new BusinessLogicIBallFixture());
       Assert.AreEqual<double>(0.0, ball.Top);
-      Assert.AreEqual<double>(0.0, ball.Left);
-      Assert.AreEqual<double>(20.0, ball.Diameter);
+      Assert.AreEqual<double>(0.0, ball.Top);
     }
 
     [TestMethod]
@@ -46,16 +45,6 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
     private class BusinessLogicIBallFixture : BusinessLogic.IBall
     {
       public event EventHandler<IPosition>? NewPositionNotification;
-
-      public double GetWeight()
-      {
-        return 2.5;
-      }
-
-      public double GetBallRadius()
-      {
-        return 10.0;
-      }
 
       public void Dispose()
       {

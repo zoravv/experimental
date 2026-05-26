@@ -9,7 +9,6 @@
 //  by introducing yourself and telling us what you do with this community.
 //_____________________________________________________________________________________________________________________________________
 
-using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -24,9 +23,6 @@ namespace TP.ConcurrentProgramming.Presentation.Model
         {
             TopBackingField = top;
             LeftBackingField = left;
-            double ballRadius = underneathBall.GetBallRadius();
-            _diameter = CalculateDiameter(ballRadius);
-            
             underneathBall.NewPositionNotification += NewPositionNotification;
         }
 
@@ -56,12 +52,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
             }
         }
 
-        public double Diameter
-        {
-            get { return _diameter; }
-        }
-
-        #endregion IBall
+        public double Diameter { get; init; } = 0;
 
         #region INotifyPropertyChanged
 
@@ -69,16 +60,12 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
         #endregion INotifyPropertyChanged
 
+        #endregion IBall
+
         #region private
 
         private double TopBackingField;
         private double LeftBackingField;
-        private double _diameter;
-
-        private static double CalculateDiameter(double ballRadius)
-        {
-            return ballRadius * 2.0;
-        }
 
         private void NewPositionNotification(object sender, IPosition e)
         {

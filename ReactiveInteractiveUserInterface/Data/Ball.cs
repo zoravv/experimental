@@ -23,8 +23,8 @@ namespace TP.ConcurrentProgramming.Data
         {
             _position = initialPosition;
             Velocity = initialVelocity;
+            BallRadius = 10;
             Weight = weight;
-            BallRadius = CalculateRadiusFromWeight(weight);
             _cancellationTokenSource = new CancellationTokenSource();
             _movementTask = Task.Run(() => RunMovementLoop(_cancellationTokenSource.Token));
         }
@@ -61,17 +61,6 @@ namespace TP.ConcurrentProgramming.Data
         private Task? _movementTask;
 
         private Vector _position;
-
-        private static double CalculateRadiusFromWeight(double weight)
-        {
-            const double minRadius = 5.0;    
-            const double maxRadius = 15.0;     
-            const double minWeight = 1.0;
-            const double maxWeight = 5.0;
-
-            double normalized = (weight - minWeight) / (maxWeight - minWeight);
-            return minRadius + (normalized * (maxRadius - minRadius));
-        }
 
         private int CalculateMovementIntervalMs(IVector velocity)
         {

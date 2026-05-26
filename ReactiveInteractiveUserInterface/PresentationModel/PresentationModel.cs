@@ -68,7 +68,10 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
         private void StartHandler(BusinessLogic.IPosition position, BusinessLogic.IBall ball)
         {
-            ModelBall newBall = new ModelBall(position.y * Scale, position.x * Scale, ball);
+            ModelBall newBall = new ModelBall(position.x * Scale, position.y * Scale, ball)
+            {
+                Diameter = UnderneathLayerAPI.GetDimensions.BallDimension * Scale
+            };
             BallChanged?.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
         }
 
@@ -97,7 +100,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
         #endregion TestingInfrastructure
     }
 
-    public record BallChaneEventArgs
+    public class BallChaneEventArgs : EventArgs
     {
         public IBall Ball { get; init; }
     }
