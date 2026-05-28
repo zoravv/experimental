@@ -20,9 +20,7 @@ namespace TP.ConcurrentProgramming.Data
         public DataImplementation() 
         {
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string solutionRoot = Path.GetFullPath(
-                Path.Combine(baseDirectory, "..", "..", "..", ".."));
-            
+            string solutionRoot = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", ".."));
             string logDirectory = Path.Combine(solutionRoot, "Logs");
             string logFilePath = Path.Combine(logDirectory, "diagnostic.log");
             _logger = new Logger(logFilePath);
@@ -118,7 +116,6 @@ namespace TP.ConcurrentProgramming.Data
                         }
                     }
                 }
-
                 _ballTasks.Clear();
                 _ballsList.Clear();
                 _logger.Dispose();

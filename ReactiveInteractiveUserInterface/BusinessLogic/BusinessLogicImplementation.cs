@@ -148,19 +148,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                             movedBall.SetVelocity(layerBellow.CreateVector(finalV1x, finalV1y));
                             other.SetVelocity(layerBellow.CreateVector(finalV2x, finalV2y));
                         }
-                        else
-                        {
-                            layerBellow.LogDiagnosticData(new DiagnosticData
-                            {
-                                Timestamp = DateTime.Now,
-                                PositionX = pos1.x,
-                                PositionY = pos1.y,
-                                VelocityX = v1.x,
-                                VelocityY = v1.y,
-                                EventType = DiagnosticEventType.CollisionNoBounce,
-                                Message = $"Balls {id1} and {id2} overlapping but moving apart."
-                            });
-                        }
                     }
                 }
             }

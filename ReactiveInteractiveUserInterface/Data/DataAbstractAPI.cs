@@ -16,8 +16,7 @@ namespace TP.ConcurrentProgramming.Data
     {
         PositionUpdate,
         WallBounce,
-        CollisionDetected,
-        CollisionNoBounce,
+        CollisionDetected
     }
 
     public class DiagnosticData

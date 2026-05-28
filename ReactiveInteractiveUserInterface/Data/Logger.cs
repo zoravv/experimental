@@ -17,7 +17,7 @@ namespace TP.ConcurrentProgramming.Data
         private bool _disposed = false;
         private int _overflowCount = 0; 
 
-        public Logger(string logFilePath, int bufferCapacity = 10)
+        public Logger(string logFilePath, int bufferCapacity = 1000)
         {
             _logFilePath = logFilePath;
             string? logDirectory = Path.GetDirectoryName(_logFilePath);
