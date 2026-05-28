@@ -14,6 +14,7 @@ namespace TP.ConcurrentProgramming.Data
         private Task? _loggingTask;
         private readonly object _lock = new object();
         private bool _disposed = false;
+        private int _overflowCount = 0; // licznik odrzuconych wpisów — inkrementowany przez wątki kulek, odczytywany przez Task loggera
 
         public Logger(string logFilePath, int bufferCapacity = 1000)
         {
@@ -47,7 +48,9 @@ namespace TP.ConcurrentProgramming.Data
 
                 if (!_buffer.TryAdd(data))
                 {
-                    WriteToLog("BUFFER_OVERFLOW: Diagnostic buffer is full. Dropping data.");
+                    // Bufor pełny — tylko inkrementujemy licznik, bez I/O na wątku kulki.
+                    // Task loggera sam zapisze informację o przepełnieniu do pliku.
+                    _overflowCount++;
                 }
             }
         }
@@ -61,10 +64,20 @@ namespace TP.ConcurrentProgramming.Data
                     while (!token.IsCancellationRequested)
                     {
                         DiagnosticData? dataToLog = null;
+                        int overflows;
                         lock (_lock)
                         {
-                            if (_buffer.TryTake(out dataToLog)) { }
-                            else { }
+                            _buffer.TryTake(out dataToLog);
+                            // Odczytujemy i resetujemy licznik przepełnień pod tym samym lockiem
+                            overflows = _overflowCount;
+                            _overflowCount = 0;
+                        }
+
+                        // Jeśli były przepełnienia — Task loggera sam zapisuje info do pliku (nie wątek kulki!)
+                        if (overflows > 0)
+                        {
+                            await sw.WriteLineAsync($"BUFFER_OVERFLOW: {overflows} diagnostic entries dropped at {DateTime.Now:O}");
+                            await sw.FlushAsync();
                         }
 
                         if (dataToLog != null)
@@ -72,8 +85,9 @@ namespace TP.ConcurrentProgramming.Data
                             await sw.WriteLineAsync(dataToLog.ToJson());
                             await sw.FlushAsync();
                         }
-                        else
+                        else if (overflows == 0)
                         {
+                            // Bufor pusty i brak przepełnień — czekaj na nowe dane
                             await Task.Delay(50, token);
                         }
                     }
@@ -88,22 +102,6 @@ namespace TP.ConcurrentProgramming.Data
             finally
             {
                 Console.WriteLine("Logging task finished.");
-            }
-        }
-
-        private void WriteToLog(string message)
-        {
-            try
-            {
-                using (StreamWriter sw = new StreamWriter(_logFilePath, append: true))
-                {
-                    sw.WriteLine(message);
-                    sw.Flush();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error writing to log file: {ex.Message}");
             }
         }
 
