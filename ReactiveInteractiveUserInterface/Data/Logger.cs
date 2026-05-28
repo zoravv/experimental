@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -83,7 +84,10 @@ namespace TP.ConcurrentProgramming.Data
 
                         if (dataToLog != null)
                         {
-                            await sw.WriteLineAsync(dataToLog.ToJson());
+                            // Serializacja do JSON (ASCII) — tu następuje konwersja danych do tekstu,
+                            // zgodnie z wymaganiem: serializacja w miejscu zapisu do pliku.
+                            string serialized = JsonSerializer.Serialize(dataToLog);
+                            await sw.WriteLineAsync(serialized);
                             await sw.FlushAsync();
                         }
                         else if (overflows == 0)
