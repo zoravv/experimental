@@ -12,9 +12,6 @@ using System;
 
 namespace TP.ConcurrentProgramming.Data
 {
-    /// <summary>
-    /// Rodzaj zdarzenia diagnostycznego — część abstrakcyjnego API warstwy Data.
-    /// </summary>
     public enum DiagnosticEventType
     {
         PositionUpdate,
@@ -23,10 +20,6 @@ namespace TP.ConcurrentProgramming.Data
         CollisionNoBounce,
     }
 
-    /// <summary>
-    /// Dane diagnostyczne przekazywane przez abstrakcyjne API — struktura kontraktu.
-    /// Serializacja danych należy do implementacji (Logger), nie do tego kontraktu.
-    /// </summary>
     public class DiagnosticData
     {
         public DateTime Timestamp { get; set; }

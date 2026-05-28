@@ -15,9 +15,9 @@ namespace TP.ConcurrentProgramming.Data
         private Task? _loggingTask;
         private readonly object _lock = new object();
         private bool _disposed = false;
-        private int _overflowCount = 0; // licznik odrzuconych wpisów — inkrementowany przez wątki kulek, odczytywany przez Task loggera
+        private int _overflowCount = 0; 
 
-        public Logger(string logFilePath, int bufferCapacity = 1000)
+        public Logger(string logFilePath, int bufferCapacity = 10)
         {
             _logFilePath = logFilePath;
             string? logDirectory = Path.GetDirectoryName(_logFilePath);
@@ -49,8 +49,6 @@ namespace TP.ConcurrentProgramming.Data
 
                 if (!_buffer.TryAdd(data))
                 {
-                    // Bufor pełny — tylko inkrementujemy licznik, bez I/O na wątku kulki.
-                    // Task loggera sam zapisze informację o przepełnieniu do pliku.
                     _overflowCount++;
                 }
             }
@@ -69,12 +67,10 @@ namespace TP.ConcurrentProgramming.Data
                         lock (_lock)
                         {
                             _buffer.TryTake(out dataToLog);
-                            // Odczytujemy i resetujemy licznik przepełnień pod tym samym lockiem
                             overflows = _overflowCount;
                             _overflowCount = 0;
                         }
 
-                        // Jeśli były przepełnienia — Task loggera sam zapisuje info do pliku (nie wątek kulki!)
                         if (overflows > 0)
                         {
                             await sw.WriteLineAsync($"BUFFER_OVERFLOW: {overflows} diagnostic entries dropped at {DateTime.Now:O}");
@@ -83,15 +79,12 @@ namespace TP.ConcurrentProgramming.Data
 
                         if (dataToLog != null)
                         {
-                            // Serializacja do JSON (ASCII) — tu następuje konwersja danych do tekstu,
-                            // zgodnie z wymaganiem: serializacja w miejscu zapisu do pliku.
                             string serialized = JsonSerializer.Serialize(dataToLog);
                             await sw.WriteLineAsync(serialized);
                             await sw.FlushAsync();
                         }
                         else if (overflows == 0)
                         {
-                            // Bufor pusty i brak przepełnień — czekaj na nowe dane
                             await Task.Delay(50, token);
                         }
                     }
@@ -121,11 +114,11 @@ namespace TP.ConcurrentProgramming.Data
             {
                 if (disposing)
                 {
-                    Console.WriteLine("Disposing Logger...");
+                    Console.WriteLine("Disposing Logger.");
                     _cancellationTokenSource.Cancel();
                     try
                     {
-                        _loggingTask?.Wait(); // Wait for the logging task to finish
+                        _loggingTask?.Wait(); 
                     }
                     catch (AggregateException ae)
                     {

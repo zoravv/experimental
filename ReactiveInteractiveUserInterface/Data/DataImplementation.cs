@@ -19,7 +19,11 @@ namespace TP.ConcurrentProgramming.Data
 
         public DataImplementation() 
         {
-            string logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs");
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string solutionRoot = Path.GetFullPath(
+                Path.Combine(baseDirectory, "..", "..", "..", ".."));
+            
+            string logDirectory = Path.Combine(solutionRoot, "Logs");
             string logFilePath = Path.Combine(logDirectory, "diagnostic.log");
             _logger = new Logger(logFilePath);
         }
