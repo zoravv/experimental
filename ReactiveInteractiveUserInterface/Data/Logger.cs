@@ -20,19 +20,18 @@ namespace TP.ConcurrentProgramming.Data
         public Logger(string logFilePath, int bufferCapacity = 1000)
         {
             _logFilePath = logFilePath;
-
-            // Utwórz katalog jeśli nie istnieje
             string? logDirectory = Path.GetDirectoryName(_logFilePath);
-            if (!string.IsNullOrEmpty(logDirectory))
-                Directory.CreateDirectory(logDirectory);
-
-            // Utwórz / zainicjuj plik diagnostyczny od razu w konstruktorze —
-            // żeby ewentualny błąd uprawnień był widoczny natychmiast, nie w tle.
-            using (StreamWriter init = new StreamWriter(_logFilePath, append: false))
+            if (!string.IsNullOrEmpty(logDirectory) && !Directory.Exists(logDirectory))
             {
-                init.WriteLine($"--- Diagnostic log started at {DateTime.Now:O} ---");
+                try
+                {
+                    Directory.CreateDirectory(logDirectory);
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Error creating log directory '{logDirectory}': {ex.Message}");
+                }
             }
-
             _buffer = new DiagnosticBuffer(bufferCapacity);
             _cancellationTokenSource = new CancellationTokenSource();
             _loggingTask = Task.Run(() => ProcessLogQueue(_cancellationTokenSource.Token));
@@ -61,7 +60,7 @@ namespace TP.ConcurrentProgramming.Data
         {
             try
             {
-                using (StreamWriter sw = new StreamWriter(_logFilePath, append: true, System.Text.Encoding.ASCII))
+                using (StreamWriter sw = new StreamWriter(_logFilePath, append: true))
                 {
                     while (!token.IsCancellationRequested)
                     {
